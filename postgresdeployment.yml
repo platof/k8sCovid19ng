@@ -21,7 +21,7 @@ spec:
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: "/mnt/data"
+    path: "/data/psql"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -52,10 +52,10 @@ spec:
   template:
     metadata:
       labels:
-        app: postgress
+        app: postgres
     spec:
       containers:
-        - image: postsql
+        - image: postsql:local
           name: postgres
           env:
             - name: POSTGRES_PASSWORD
@@ -66,12 +66,12 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
-                  name: postgresconfig
+                  name: postgres-config
                   key: postgresuser
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
-                  name: postgresconfig
+                  name: postgres-config
                   key: postgresdb
           ports:
             - containerPort: 5432
