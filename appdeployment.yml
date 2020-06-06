@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-frontend
+  namespace: covid19-ng
+  labels:
+    app: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - image: seyio/scraper-app
+          name: server
+          env:
+            - name: REDIS_HOST
+              value: ngcovid-cache
+            - name: REDIS_PORT
+              value: "6379"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: dburlpass
+        - image: nginupdate:local
+          name: app-frontend
+          ports:
+          - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: covid19-ng
+  name: frontend
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 32225
+  selector:
+    app: frontend
